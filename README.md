@@ -72,8 +72,8 @@ Abaixo o registro do uso de Inteligência Artificial para auxílio no desenvolvi
 
 | Ferramenta | Objetivo | Resumo do uso | Revisão pelo Dev |
 | :--- | :--- | :--- | :--- |
-| Gemini e ChatGPT | Raciocínio, Documentação e README | Auxiliou na estruturação da ideia do projeto, formatação e redação inicial do ficheiro README.md e definição das regras de negócio. | Validação dos nomes, regras alinhadas com o PDF do projeto e ajustes na clareza do texto. |
-| [Adicionar IA] | [Código / Testes] | [Preencher durante o desenvolvimento] | [Preencher durante o desenvolvimento] |
+| Gemini | Raciocínio, Documentação e README | Auxiliou na estruturação da ideia do projeto, formatação e redação inicial do ficheiro README.md e definição das regras de negócio. | Validação dos nomes, regras alinhadas com o PDF do projeto e ajustes na clareza do texto. |
+| | | | |
 
 ---
 *Projeto com apresentação agendada para 07/10/2026*[cite: 8].
