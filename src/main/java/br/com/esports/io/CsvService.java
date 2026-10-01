@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CsvService {
     public Path exportarRanking(Torneio torneio, Path destino) throws IOException {
@@ -17,7 +18,7 @@ public class CsvService {
         linhas.add("posicao,equipe,tag,jogos,vitorias,derrotas,pontos,saldo_rounds,taxa_vitorias");
         int posicao = 1;
         for (ClassificacaoEquipe item : torneio.gerarRanking()) {
-            linhas.add("%d,%s,%s,%d,%d,%d,%d,%d,%.2f%%".formatted(posicao++,
+            linhas.add(String.format(Locale.ROOT, "%d,%s,%s,%d,%d,%d,%d,%d,%.2f%%", posicao++,
                     escapar(item.getEquipe().getNome()), escapar(item.getEquipe().getTag()), item.getJogos(),
                     item.getVitorias(), item.getDerrotas(), item.getPontos(), item.getSaldoRounds(),
                     item.calcularTaxaVitorias()));

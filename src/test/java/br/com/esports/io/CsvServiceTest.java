@@ -20,5 +20,6 @@ class CsvServiceTest {
         String conteudo = Files.readString(arquivo);
         assertTrue(conteudo.startsWith("posicao,equipe,tag"));
         assertTrue(conteudo.contains("\"Equipe, Teste\""));
+        assertTrue(conteudo.contains("0.00%"));
     }
 }
