@@ -1,79 +1,133 @@
-# Sistema de Gerenciamento e Análise de Torneios de E-Sports
+# Sistema de Gerenciamento de Torneios de E-Sports
 
-## Integrantes
-* **Arthur Moraes**: Responsável pela modelagem das classes de domínio, atributos privados e implementação das coleções (ArrayList)[cite: 2, 7].
-* **Raphael Tuma**: Responsável pelo desenvolvimento das regras de negócio nas classes competentes e implementação dos testes automatizados com JUnit[cite: 3, 6, 7].
-* **Thiago Sawada**: Responsável pela lógica dos relatórios, indicadores matemáticos, ranking e funcionalidade de exportação de dados em CSV[cite: 4, 6, 7].
-* **Gustavo Pinho**: Responsável pela classe principal (Main/App), interface interativa de terminal e menus de operações[cite: 5, 7].
+Aplicação Java orientada a objetos para organizar torneios de e-sports, desde a montagem das equipes até a classificação final. O sistema reduz erros comuns de controles manuais em planilhas, como inscrição de equipes incompletas, partidas conflitantes e pontuações incorretas.
 
-## Descrição do Problema
-A organização de campeonatos de E-sports de pequeno e médio porte muitas vezes é feita de forma manual em planilhas, o que gera erros de agendamento, cálculos incorretos de pontuação e dificuldade em gerenciar chaves e inscrições[cite: 1]. 
-Este sistema pretende resolver esse problema centralizando a gestão dos torneios. Os possíveis usuários do sistema são organizadores de campeonatos locais, administradores de ligas universitárias e coordenadores de "lan houses" ou arenas gamers[cite: 1].
+Os usuários previstos são organizadores de campeonatos locais, ligas universitárias, lan houses e arenas gamers.
 
-## Funcionalidade Principal (Fluxo Completo)
-O projeto implementa um processo completo de gestão esportiva que segue o fluxo: 
-**Inscrição → Agendamento (Participação) → Processamento de Resultados → Atualização de Classificação**[cite: 4].
-Esse fluxo interliga as classes de Equipe, Inscrição, Partida e Torneio, garantindo o ciclo de vida completo de um campeonato[cite: 4].
+## Integrantes e responsabilidades
 
-## Funcionalidades Operacionais
-O sistema possui as seguintes operações obrigatórias através de um menu interativo[cite: 2, 5]:
-* Cadastrar equipes, jogadores e torneios[cite: 2].
-* Consultar e pesquisar objetos por atributos específicos[cite: 2].
-* Editar e desativar registros[cite: 2].
-* Associar objetos (ex: inscrever equipe em torneio)[cite: 2].
-* Ordenar objetos e gerar relatórios[cite: 2].
+| Integrante | Responsabilidade principal |
+| --- | --- |
+| Arthur Moraes | Modelagem das classes de domínio e coleções |
+| Raphael Tuma | Regras de negócio e testes automatizados |
+| Thiago Sawada | Relatórios, indicadores, ranking e exportação CSV |
+| Gustavo Pinho | Menu interativo e fluxo da aplicação |
 
-## Principais Classes
-O sistema baseia-se na composição e interação entre objetos, sem a obrigatoriedade de herança[cite: 2, 5]:
-* **Torneio**: Classe central, possui coleções (`ArrayList`) de `Inscricao` e `Partida`[cite: 2].
-* **Equipe**: Entidade competidora, possui coleção (`ArrayList`) de `Jogador`[cite: 2].
-* **Jogador**: Classe base de dados do participante[cite: 2].
-* **Partida**: Associa duas equipes, gerencia data, horário e resultado[cite: 2].
-* **Inscricao**: Classe associativa que liga uma Equipe a um Torneio[cite: 2].
-* **Estatistica**: Mantém métricas individuais de desempenho[cite: 2].
+## Funcionalidade principal
 
-## Regras de Negócio
-O sistema implementa regras comportamentais específicas do domínio[cite: 3, 7]:
-1. **Limite de Inscrição**: Impedir a inscrição de uma equipe que não possua o número mínimo de 5 jogadores cadastrados[cite: 3].
-2. **Conflito de Agenda**: Identificar conflito entre registros, impedindo que a mesma equipe seja alocada para duas partidas no mesmo horário[cite: 3].
-3. **Status Automático**: Alterar automaticamente o status do torneio (de "Inscrições Abertas" para "Em Andamento") quando a primeira partida iniciar ou a capacidade for atingida[cite: 3].
-4. **Cálculo de Pontuação**: Calcular automaticamente a pontuação na tabela com base no resultado da partida inserida[cite: 3].
-5. **Disponibilidade**: Calcular a disponibilidade de vagas restantes para novas inscrições no torneio[cite: 3].
+O processo central envolve quatro classes principais e ocorre assim:
 
-## Relatórios e Indicadores
-O sistema fornece os seguintes dados essenciais[cite: 4, 7]:
-1. **Cálculo de Média**: Média de pontos ou abates por partida no torneio[cite: 4].
-2. **Cálculo de Total**: Total geral de jogadores e equipes ativas no sistema[cite: 4].
-3. **Maior/Menor Valor**: Identificação do MVP (jogador com maior pontuação individual global)[cite: 4].
-4. **Ranking**: Tabela de classificação ordenada das equipes no torneio[cite: 4].
-5. **Indicador da Equipe**: Taxa de vitórias (Win rate) calculada pelo histórico da equipe[cite: 4].
+`Equipe → Inscrição → Partida → Resultado → Classificação`
 
-## Tecnologias Utilizadas
-* **Linguagem**: Java (Foco em POO, Encapsulamento, Separação de Responsabilidades e Coleções)[cite: 4, 5, 7].
-* **Gerenciador de Dependências**: Maven ou Gradle[cite: 6, 7].
-* **Tecnologia Externa 1 (Médio)**: Testes automatizados com biblioteca **JUnit** para validar regras de negócio[cite: 6, 7].
-* **Tecnologia Externa 2 (Fácil)**: Importação e exportação de relatórios (como o Ranking final) em formato **CSV**[cite: 6, 7].
+Após a equipe possuir jogadores suficientes, ela pode ser inscrita em um torneio. O organizador agenda a partida, registra placar e estatísticas individuais, e o sistema atualiza automaticamente pontuação, saldo de rounds, taxa de vitórias, ranking e status do torneio.
 
-## Instruções para Configuração e Execução
-1. Faça o clone do repositório em sua máquina[cite: 7].
-2. Importe o projeto em sua IDE de preferência (IntelliJ, Eclipse, VSCode) como um projeto Maven/Gradle[cite: 6, 7].
-3. Aguarde o download das dependências (JUnit, etc)[cite: 6, 7].
-4. Navegue até o pacote principal e execute o método `main` na classe `Main` (ou `App`)[cite: 5, 7].
+## Funcionalidades
 
-## Exemplos de Utilização
-Ao rodar a aplicação, o usuário interage via terminal[cite: 5, 7]. Exemplo de fluxo:
-1. O usuário seleciona `[1] - Cadastrar Equipe`[cite: 2, 7].
-2. O usuário seleciona `[2] - Cadastrar Jogadores na Equipe`[cite: 2, 7].
-3. O usuário seleciona `[3] - Inscrever Equipe em Torneio`[cite: 2, 7].
-4. O usuário processa uma partida e depois acessa `[4] - Exibir Relatórios` -> `Ranking CSV` para ver a tabela[cite: 4, 6, 7].
+- Cadastrar e editar equipes, jogadores e torneios.
+- Consultar e listar registros em ordem alfabética.
+- Pesquisar equipes por nome/tag e torneios por jogo.
+- Desativar equipes conforme as regras do domínio.
+- Inscrever e cancelar a inscrição de equipes.
+- Agendar e reagendar partidas, detectando conflitos.
+- Registrar resultados e estatísticas individuais.
+- Calcular classificação, pontos, saldo e taxa de vitórias.
+- Identificar o MVP e calcular a média de abates por partida.
+- Calcular totais de equipes e jogadores ativos e vagas disponíveis.
+- Exportar o ranking de um torneio para CSV.
+
+## Principais classes
+
+- `SistemaEsports`: coordena cadastros, consultas, pesquisas e desativação.
+- `Torneio`: concentra inscrições, partidas, classificação e regras do campeonato.
+- `Equipe`: representa uma organização competidora e possui uma coleção de jogadores.
+- `Jogador`: participante com dados pessoais, estado e estatísticas.
+- `Inscricao`: associação entre equipe e torneio.
+- `Partida`: confronto, agenda, placar e desempenhos individuais.
+- `ClassificacaoEquipe`: jogos, vitórias, derrotas, pontos, saldo e win rate.
+- `Estatistica`: totais e médias individuais.
+- `DesempenhoJogador`: estatísticas de um jogador em uma partida.
+
+Os atributos são privados e as alterações de estado são feitas pelos métodos das próprias classes. `Equipe` e `Torneio` possuem múltiplas coleções de objetos, demonstrando composição e associação.
+
+## Regras de negócio
+
+1. Uma equipe precisa estar ativa e possuir no mínimo cinco jogadores ativos para se inscrever.
+2. A mesma equipe não pode se inscrever duas vezes no mesmo torneio.
+3. A capacidade do torneio limita as inscrições; ao lotar, o status muda para `EM_ANDAMENTO`.
+4. Apenas equipes inscritas podem disputar uma partida.
+5. Uma equipe não pode estar em duas partidas não finalizadas no mesmo horário.
+6. Partidas não admitem placar negativo nem empate e um resultado só pode ser registrado uma vez.
+7. O resultado concede três pontos ao vencedor e atualiza automaticamente vitórias, derrotas e saldo.
+8. Quando todas as partidas cadastradas terminam, o torneio muda para `FINALIZADO`.
+9. Uma equipe inscrita em torneio ativo não pode ser desativada.
+10. Nicknames são únicos em todo o sistema e estatísticas só podem pertencer a jogadores do confronto.
+
+## Relatórios e indicadores
+
+- **Média:** abates por partida finalizada.
+- **Total:** equipes e jogadores ativos.
+- **Maior valor:** jogador com mais abates (MVP, com KDA como desempate).
+- **Ranking:** pontos, vitórias, saldo de rounds e nome como critérios de ordenação.
+- **Indicador próprio:** taxa de vitórias de cada equipe.
+- **Disponibilidade:** vagas restantes no torneio.
+
+## Tecnologias
+
+- Java 17 e Programação Orientada a Objetos.
+- Maven para estrutura e dependências.
+- JUnit 5 para testes automatizados das regras de negócio.
+- Java NIO para exportação de ranking em CSV.
+
+JUnit e CSV atendem às duas funcionalidades com tecnologias externas ao núcleo da linguagem solicitadas no projeto.
+
+## Configuração e execução
+
+Pré-requisitos: JDK 17 ou mais recente e Maven 3.9 ou mais recente.
+
+```bash
+git clone https://github.com/rxzinbr/sistema-gerenciamento-esports.git
+cd sistema-gerenciamento-esports
+mvn clean test
+mvn exec:java
+```
+
+Também é possível abrir a pasta como projeto Maven no IntelliJ IDEA, Eclipse ou VS Code e executar `br.com.esports.app.Main`.
+
+## Exemplo de utilização
+
+1. Cadastre duas equipes.
+2. Cadastre ao menos cinco jogadores ativos em cada equipe.
+3. Crie um torneio com capacidade mínima de duas equipes.
+4. Inscreva as equipes e agende uma partida.
+5. Registre o placar e, opcionalmente, as estatísticas dos jogadores.
+6. Abra os relatórios para consultar ranking, MVP, média, totais e win rate.
+7. Exporte o ranking; o arquivo será salvo em `relatorios/ranking-torneio-ID.csv`.
+
+Datas e horas no menu usam o formato `dd/MM/yyyy HH:mm`.
+
+## Estrutura
+
+```text
+src/
+├── main/java/br/com/esports/
+│   ├── app/        # menu de terminal
+│   ├── domain/     # entidades e regras do domínio
+│   ├── exception/  # exceções de regra de negócio
+│   ├── io/         # exportação CSV
+│   └── service/    # coordenação e relatórios
+└── test/java/br/com/esports/
+    ├── domain/
+    ├── io/
+    └── service/
+```
 
 ## Utilização de IA
-Abaixo o registro do uso de Inteligência Artificial para auxílio no desenvolvimento, conforme padronização do projeto[cite: 7, 8].
 
 | Ferramenta | Objetivo | Resumo do uso | Revisão pelo Dev |
-| :--- | :--- | :--- | :--- |
-| Gemini | Raciocínio, Documentação e README | Auxiliou na estruturação da ideia do projeto, formatação e redação inicial do ficheiro README.md e definição das regras de negócio. | Validação dos nomes, regras alinhadas com o PDF do projeto e ajustes na clareza do texto. |
-| | | | |
+| --- | --- | --- | --- |
+| Gemini | Raciocínio, documentação e README | Apoiou a estruturação inicial da ideia, das regras de negócio e do texto do README. | Validação das regras em relação ao enunciado e ajustes de clareza. |
+| OpenAI Codex | Código base, regras, testes e documentação | Implementou a arquitetura POO, menu, fluxo do torneio, relatórios, CSV e suíte de testes; removeu referências de citação inválidas do rascunho. | A equipe deve executar os testes, revisar cada regra e praticar alterações antes da apresentação. |
 
----
-*Projeto com apresentação agendada para 07/10/2026*[cite: 8].
+> A equipe é responsável por compreender e revisar todo o código. Durante a apresentação, qualquer integrante poderá ser questionado e solicitado a realizar pequenas alterações.
+
+Apresentação prevista no enunciado: **07/10/2026**.
