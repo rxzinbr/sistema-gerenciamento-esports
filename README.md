@@ -80,6 +80,10 @@ Os atributos são privados e as alterações de estado são feitas pelos método
 
 JUnit e CSV atendem às duas funcionalidades com tecnologias externas ao núcleo da linguagem solicitadas no projeto.
 
+O código foi escrito de forma didática, usando principalmente classes comuns, encapsulamento,
+`ArrayList`, estruturas `if`, laços `for` e `switch` tradicional. Isso facilita a leitura,
+a divisão entre os integrantes e a explicação do projeto durante a apresentação.
+
 ## Configuração e execução
 
 Pré-requisitos: JDK 17 ou mais recente e Maven 3.9 ou mais recente.

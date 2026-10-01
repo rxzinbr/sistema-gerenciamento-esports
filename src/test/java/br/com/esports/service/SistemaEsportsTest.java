@@ -38,7 +38,7 @@ class SistemaEsportsTest {
         t.registrarResultado(p.getId(), 13, 7, List.of(new DesempenhoJogador(ace, 25, 8, 4)));
         RelatorioService r = new RelatorioService(sistema);
         assertEquals(25.0, r.mediaAbatesPorPartida(t));
-        assertEquals(ace, r.encontrarMvp(t).orElseThrow());
+        assertEquals(ace, r.encontrarMvp(t));
     }
     private Equipe criarEquipeCompleta(SistemaEsports sistema, String nome, String tag) {
         Equipe e = sistema.cadastrarEquipe(nome, tag);

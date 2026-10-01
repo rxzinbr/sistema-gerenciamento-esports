@@ -3,7 +3,6 @@ package br.com.esports.domain;
 import br.com.esports.exception.RegraNegocioException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class Torneio {
@@ -62,13 +61,25 @@ public class Torneio {
         if (status != StatusTorneio.INSCRICOES_ABERTAS) {
             throw new RegraNegocioException("Inscricoes so podem ser canceladas enquanto estiverem abertas.");
         }
-        Inscricao inscricao = inscricoes.stream().filter(i -> i.isAtiva() && i.getEquipe().equals(equipe))
-                .findFirst().orElseThrow(() -> new RegraNegocioException("Equipe nao inscrita."));
-        if (partidas.stream().anyMatch(p -> p.envolve(equipe))) {
-            throw new RegraNegocioException("Equipe com partida agendada nao pode cancelar a inscricao.");
+        Inscricao inscricao = null;
+        for (Inscricao inscricaoCadastrada : inscricoes) {
+            if (inscricaoCadastrada.isAtiva() && inscricaoCadastrada.getEquipe().equals(equipe)) {
+                inscricao = inscricaoCadastrada;
+                break;
+            }
+        }
+        if (inscricao == null) throw new RegraNegocioException("Equipe nao inscrita.");
+        for (Partida partida : partidas) {
+            if (partida.envolve(equipe)) {
+                throw new RegraNegocioException("Equipe com partida agendada nao pode cancelar a inscricao.");
+            }
         }
         inscricao.cancelar();
-        classificacoes.removeIf(c -> c.getEquipe().equals(equipe));
+        ClassificacaoEquipe classificacaoParaRemover = null;
+        for (ClassificacaoEquipe classificacao : classificacoes) {
+            if (classificacao.getEquipe().equals(equipe)) classificacaoParaRemover = classificacao;
+        }
+        classificacoes.remove(classificacaoParaRemover);
     }
 
     public Partida agendarPartida(Equipe equipeA, Equipe equipeB, LocalDateTime dataHora) {
@@ -77,8 +88,15 @@ public class Torneio {
             throw new RegraNegocioException("As duas equipes devem estar inscritas no torneio.");
         }
         if (equipeA.equals(equipeB)) throw new RegraNegocioException("Uma equipe nao pode jogar contra si mesma.");
-        boolean conflito = partidas.stream().filter(p -> !p.isFinalizada())
-                .anyMatch(p -> p.getDataHora().equals(dataHora) && (p.envolve(equipeA) || p.envolve(equipeB)));
+        boolean conflito = false;
+        for (Partida partidaCadastrada : partidas) {
+            if (!partidaCadastrada.isFinalizada()
+                    && partidaCadastrada.getDataHora().equals(dataHora)
+                    && (partidaCadastrada.envolve(equipeA) || partidaCadastrada.envolve(equipeB))) {
+                conflito = true;
+                break;
+            }
+        }
         if (conflito) throw new RegraNegocioException("Conflito de agenda: uma equipe ja joga nesse horario.");
         Partida partida = new Partida(proximaPartidaId++, equipeA, equipeB, dataHora);
         partidas.add(partida);
@@ -87,9 +105,16 @@ public class Torneio {
 
     public void reagendarPartida(int partidaId, LocalDateTime novaDataHora) {
         Partida partida = buscarPartida(partidaId);
-        boolean conflito = partidas.stream().filter(p -> p.getId() != partidaId && !p.isFinalizada())
-                .anyMatch(p -> p.getDataHora().equals(novaDataHora)
-                        && (p.envolve(partida.getEquipeA()) || p.envolve(partida.getEquipeB())));
+        boolean conflito = false;
+        for (Partida partidaCadastrada : partidas) {
+            if (partidaCadastrada.getId() != partidaId && !partidaCadastrada.isFinalizada()
+                    && partidaCadastrada.getDataHora().equals(novaDataHora)
+                    && (partidaCadastrada.envolve(partida.getEquipeA())
+                    || partidaCadastrada.envolve(partida.getEquipeB()))) {
+                conflito = true;
+                break;
+            }
+        }
         if (conflito) throw new RegraNegocioException("Conflito de agenda no novo horario.");
         partida.reagendar(novaDataHora);
     }
@@ -99,39 +124,77 @@ public class Torneio {
         partida.registrarResultado(placarA, placarB, desempenhos);
         buscarClassificacao(partida.getEquipeA()).registrarResultado(placarA, placarB);
         buscarClassificacao(partida.getEquipeB()).registrarResultado(placarB, placarA);
-        status = partidas.stream().allMatch(Partida::isFinalizada)
-                ? StatusTorneio.FINALIZADO : StatusTorneio.EM_ANDAMENTO;
+        boolean todasFinalizadas = true;
+        for (Partida partidaCadastrada : partidas) {
+            if (!partidaCadastrada.isFinalizada()) {
+                todasFinalizadas = false;
+                break;
+            }
+        }
+        if (todasFinalizadas) status = StatusTorneio.FINALIZADO;
+        else status = StatusTorneio.EM_ANDAMENTO;
     }
 
     public Partida buscarPartida(int partidaId) {
-        return partidas.stream().filter(p -> p.getId() == partidaId).findFirst()
-                .orElseThrow(() -> new RegraNegocioException("Partida nao encontrada."));
+        for (Partida partida : partidas) {
+            if (partida.getId() == partidaId) return partida;
+        }
+        throw new RegraNegocioException("Partida nao encontrada.");
     }
     private ClassificacaoEquipe buscarClassificacao(Equipe equipe) {
-        return classificacoes.stream().filter(c -> c.getEquipe().equals(equipe)).findFirst()
-                .orElseThrow(() -> new RegraNegocioException("Classificacao nao encontrada."));
+        for (ClassificacaoEquipe classificacao : classificacoes) {
+            if (classificacao.getEquipe().equals(equipe)) return classificacao;
+        }
+        throw new RegraNegocioException("Classificacao nao encontrada.");
     }
     public boolean estaInscrita(Equipe equipe) {
-        return inscricoes.stream().anyMatch(i -> i.isAtiva() && i.getEquipe().equals(equipe));
+        for (Inscricao inscricao : inscricoes) {
+            if (inscricao.isAtiva() && inscricao.getEquipe().equals(equipe)) return true;
+        }
+        return false;
     }
-    public long quantidadeInscricoesAtivas() { return inscricoes.stream().filter(Inscricao::isAtiva).count(); }
+    public long quantidadeInscricoesAtivas() {
+        long quantidade = 0;
+        for (Inscricao inscricao : inscricoes) {
+            if (inscricao.isAtiva()) quantidade++;
+        }
+        return quantidade;
+    }
     public int vagasDisponiveis() { return capacidadeEquipes - (int) quantidadeInscricoesAtivas(); }
     public List<ClassificacaoEquipe> gerarRanking() {
-        return classificacoes.stream()
-                .sorted(Comparator.comparingInt(ClassificacaoEquipe::getPontos).reversed()
-                        .thenComparing(Comparator.comparingInt(ClassificacaoEquipe::getVitorias).reversed())
-                        .thenComparing(Comparator.comparingInt(ClassificacaoEquipe::getSaldoRounds).reversed())
-                        .thenComparing(c -> c.getEquipe().getNome(), String.CASE_INSENSITIVE_ORDER)).toList();
+        ArrayList<ClassificacaoEquipe> ranking = new ArrayList<>(classificacoes);
+        for (int i = 0; i < ranking.size(); i++) {
+            for (int j = i + 1; j < ranking.size(); j++) {
+                if (vemAntes(ranking.get(j), ranking.get(i))) {
+                    ClassificacaoEquipe temporaria = ranking.get(i);
+                    ranking.set(i, ranking.get(j));
+                    ranking.set(j, temporaria);
+                }
+            }
+        }
+        return ranking;
+    }
+    private boolean vemAntes(ClassificacaoEquipe equipe1, ClassificacaoEquipe equipe2) {
+        if (equipe1.getPontos() != equipe2.getPontos()) {
+            return equipe1.getPontos() > equipe2.getPontos();
+        }
+        if (equipe1.getVitorias() != equipe2.getVitorias()) {
+            return equipe1.getVitorias() > equipe2.getVitorias();
+        }
+        if (equipe1.getSaldoRounds() != equipe2.getSaldoRounds()) {
+            return equipe1.getSaldoRounds() > equipe2.getSaldoRounds();
+        }
+        return equipe1.getEquipe().getNome().compareToIgnoreCase(equipe2.getEquipe().getNome()) < 0;
     }
     public int getId() { return id; }
     public String getNome() { return nome; }
     public String getJogo() { return jogo; }
     public int getCapacidadeEquipes() { return capacidadeEquipes; }
     public StatusTorneio getStatus() { return status; }
-    public List<Inscricao> getInscricoes() { return List.copyOf(inscricoes); }
-    public List<Partida> getPartidas() { return List.copyOf(partidas); }
+    public List<Inscricao> getInscricoes() { return new ArrayList<>(inscricoes); }
+    public List<Partida> getPartidas() { return new ArrayList<>(partidas); }
     @Override public String toString() {
-        return "%d - %s (%s) | %s | %d/%d equipes".formatted(id, nome, jogo,
+        return String.format("%d - %s (%s) | %s | %d/%d equipes", id, nome, jogo,
                 status.getDescricao(), quantidadeInscricoesAtivas(), capacidadeEquipes);
     }
 }

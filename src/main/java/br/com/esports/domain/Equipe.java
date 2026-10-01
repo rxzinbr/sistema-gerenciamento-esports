@@ -2,7 +2,6 @@ package br.com.esports.domain;
 
 import br.com.esports.exception.RegraNegocioException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,34 +29,59 @@ public class Equipe {
 
     public void adicionarJogador(Jogador jogador) {
         Objects.requireNonNull(jogador, "Jogador obrigatorio.");
-        if (jogadores.stream().anyMatch(j -> j.getNickname().equalsIgnoreCase(jogador.getNickname()))) {
-            throw new RegraNegocioException("Ja existe jogador com esse nickname na equipe.");
+        for (Jogador jogadorCadastrado : jogadores) {
+            if (jogadorCadastrado.getNickname().equalsIgnoreCase(jogador.getNickname())) {
+                throw new RegraNegocioException("Ja existe jogador com esse nickname na equipe.");
+            }
         }
         jogadores.add(jogador);
     }
 
     public Jogador buscarJogadorPorId(int jogadorId) {
-        return jogadores.stream().filter(j -> j.getId() == jogadorId).findFirst()
-                .orElseThrow(() -> new RegraNegocioException("Jogador nao encontrado na equipe."));
+        for (Jogador jogador : jogadores) {
+            if (jogador.getId() == jogadorId) return jogador;
+        }
+        throw new RegraNegocioException("Jogador nao encontrado na equipe.");
     }
 
     public List<Jogador> getJogadoresOrdenadosPorNickname() {
-        return jogadores.stream().sorted(Comparator.comparing(Jogador::getNickname,
-                String.CASE_INSENSITIVE_ORDER)).toList();
+        ArrayList<Jogador> jogadoresOrdenados = new ArrayList<>(jogadores);
+        for (int i = 0; i < jogadoresOrdenados.size(); i++) {
+            for (int j = i + 1; j < jogadoresOrdenados.size(); j++) {
+                Jogador primeiro = jogadoresOrdenados.get(i);
+                Jogador segundo = jogadoresOrdenados.get(j);
+                if (primeiro.getNickname().compareToIgnoreCase(segundo.getNickname()) > 0) {
+                    jogadoresOrdenados.set(i, segundo);
+                    jogadoresOrdenados.set(j, primeiro);
+                }
+            }
+        }
+        return jogadoresOrdenados;
     }
 
-    public long quantidadeJogadoresAtivos() { return jogadores.stream().filter(Jogador::isAtivo).count(); }
+    public long quantidadeJogadoresAtivos() {
+        long quantidade = 0;
+        for (Jogador jogador : jogadores) {
+            if (jogador.isAtivo()) quantidade++;
+        }
+        return quantidade;
+    }
     public void desativar() { this.ativa = false; }
     public void ativar() { this.ativa = true; }
     public int getId() { return id; }
     public String getNome() { return nome; }
     public String getTag() { return tag; }
     public boolean isAtiva() { return ativa; }
-    public List<Jogador> getJogadores() { return List.copyOf(jogadores); }
-    @Override public boolean equals(Object o) { return this == o || o instanceof Equipe e && id == e.id; }
+    public List<Jogador> getJogadores() { return new ArrayList<>(jogadores); }
+    @Override public boolean equals(Object objeto) {
+        if (this == objeto) return true;
+        if (!(objeto instanceof Equipe)) return false;
+        Equipe outraEquipe = (Equipe) objeto;
+        return id == outraEquipe.id;
+    }
     @Override public int hashCode() { return Objects.hash(id); }
     @Override public String toString() {
-        return "%d - [%s] %s (%d jogadores ativos)%s".formatted(id, tag, nome,
+        return String.format("%d - [%s] %s (%d jogadores ativos)%s", id, tag, nome,
                 quantidadeJogadoresAtivos(), ativa ? "" : " [inativa]");
     }
 }

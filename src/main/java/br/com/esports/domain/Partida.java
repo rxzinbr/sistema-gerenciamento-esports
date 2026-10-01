@@ -36,18 +36,20 @@ public class Partida {
         if (placarA == placarB) throw new RegraNegocioException("A partida deve possuir um vencedor.");
         Set<Jogador> jogadoresInformados = new HashSet<>();
         for (DesempenhoJogador desempenho : novosDesempenhos) {
-            boolean pertence = equipeA.getJogadores().contains(desempenho.jogador())
-                    || equipeB.getJogadores().contains(desempenho.jogador());
+            boolean pertence = equipeA.getJogadores().contains(desempenho.getJogador())
+                    || equipeB.getJogadores().contains(desempenho.getJogador());
             if (!pertence) throw new RegraNegocioException("Jogador informado nao participa desta partida.");
-            if (!jogadoresInformados.add(desempenho.jogador())) {
+            if (!jogadoresInformados.add(desempenho.getJogador())) {
                 throw new RegraNegocioException("Desempenho duplicado para o mesmo jogador.");
             }
         }
         this.placarA = placarA;
         this.placarB = placarB;
         this.desempenhos.addAll(novosDesempenhos);
-        novosDesempenhos.forEach(d -> d.jogador().getEstatistica()
-                .registrarDesempenho(d.abates(), d.mortes(), d.assistencias()));
+        for (DesempenhoJogador desempenho : novosDesempenhos) {
+            desempenho.getJogador().getEstatistica().registrarDesempenho(
+                    desempenho.getAbates(), desempenho.getMortes(), desempenho.getAssistencias());
+        }
         this.finalizada = true;
     }
 
@@ -63,9 +65,10 @@ public class Partida {
     public Integer getPlacarA() { return placarA; }
     public Integer getPlacarB() { return placarB; }
     public boolean isFinalizada() { return finalizada; }
-    public List<DesempenhoJogador> getDesempenhos() { return List.copyOf(desempenhos); }
+    public List<DesempenhoJogador> getDesempenhos() { return new ArrayList<>(desempenhos); }
     @Override public String toString() {
-        String resultado = finalizada ? "%d x %d".formatted(placarA, placarB) : "agendada";
-        return "%d - [%s] %s x %s - %s".formatted(id, dataHora, equipeA.getTag(), equipeB.getTag(), resultado);
+        String resultado = finalizada ? String.format("%d x %d", placarA, placarB) : "agendada";
+        return String.format("%d - [%s] %s x %s - %s", id, dataHora,
+                equipeA.getTag(), equipeB.getTag(), resultado);
     }
 }

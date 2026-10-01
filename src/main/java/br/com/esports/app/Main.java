@@ -3,6 +3,7 @@ package br.com.esports.app;
 import br.com.esports.domain.ClassificacaoEquipe;
 import br.com.esports.domain.DesempenhoJogador;
 import br.com.esports.domain.Equipe;
+import br.com.esports.domain.Inscricao;
 import br.com.esports.domain.Jogador;
 import br.com.esports.domain.Partida;
 import br.com.esports.domain.Torneio;
@@ -43,44 +44,42 @@ public class Main {
     }
 
     private void exibirMenu() {
-        System.out.println("""
-
-                1  - Cadastrar equipe
-                2  - Cadastrar jogador em equipe
-                3  - Editar equipe
-                4  - Desativar equipe
-                5  - Cadastrar torneio
-                6  - Editar torneio
-                7  - Inscrever equipe em torneio
-                8  - Cancelar inscricao
-                9  - Agendar partida
-                10 - Registrar resultado
-                11 - Listar dados
-                12 - Pesquisar
-                13 - Exibir relatorios e indicadores
-                14 - Exportar ranking em CSV
-                0  - Sair
-                """);
+        System.out.println();
+        System.out.println("1  - Cadastrar equipe");
+        System.out.println("2  - Cadastrar jogador em equipe");
+        System.out.println("3  - Editar equipe");
+        System.out.println("4  - Desativar equipe");
+        System.out.println("5  - Cadastrar torneio");
+        System.out.println("6  - Editar torneio");
+        System.out.println("7  - Inscrever equipe em torneio");
+        System.out.println("8  - Cancelar inscricao");
+        System.out.println("9  - Agendar partida");
+        System.out.println("10 - Registrar resultado");
+        System.out.println("11 - Listar dados");
+        System.out.println("12 - Pesquisar");
+        System.out.println("13 - Exibir relatorios e indicadores");
+        System.out.println("14 - Exportar ranking em CSV");
+        System.out.println("0  - Sair");
     }
 
     private void executarOpcao(int opcao) throws IOException {
         switch (opcao) {
-            case 1 -> cadastrarEquipe();
-            case 2 -> cadastrarJogador();
-            case 3 -> editarEquipe();
-            case 4 -> desativarEquipe();
-            case 5 -> cadastrarTorneio();
-            case 6 -> editarTorneio();
-            case 7 -> inscreverEquipe();
-            case 8 -> cancelarInscricao();
-            case 9 -> agendarPartida();
-            case 10 -> registrarResultado();
-            case 11 -> listarDados();
-            case 12 -> pesquisar();
-            case 13 -> exibirRelatorios();
-            case 14 -> exportarCsv();
-            case 0 -> { }
-            default -> System.out.println("Opcao invalida.");
+            case 1: cadastrarEquipe(); break;
+            case 2: cadastrarJogador(); break;
+            case 3: editarEquipe(); break;
+            case 4: desativarEquipe(); break;
+            case 5: cadastrarTorneio(); break;
+            case 6: editarTorneio(); break;
+            case 7: inscreverEquipe(); break;
+            case 8: cancelarInscricao(); break;
+            case 9: agendarPartida(); break;
+            case 10: registrarResultado(); break;
+            case 11: listarDados(); break;
+            case 12: pesquisar(); break;
+            case 13: exibirRelatorios(); break;
+            case 14: exportarCsv(); break;
+            case 0: break;
+            default: System.out.println("Opcao invalida.");
         }
     }
 
@@ -129,7 +128,9 @@ public class Main {
     }
     private void agendarPartida() {
         Torneio t = selecionarTorneio();
-        t.getInscricoes().stream().filter(i -> i.isAtiva()).forEach(i -> System.out.println(i.getEquipe()));
+        for (Inscricao inscricao : t.getInscricoes()) {
+            if (inscricao.isAtiva()) System.out.println(inscricao.getEquipe());
+        }
         Equipe a = sistema.buscarEquipe(lerInt("Id da equipe A: "));
         Equipe b = sistema.buscarEquipe(lerInt("Id da equipe B: "));
         Partida p = t.agendarPartida(a, b, lerDataHora("Data e hora (dd/MM/yyyy HH:mm): "));
@@ -137,7 +138,7 @@ public class Main {
     }
     private void registrarResultado() {
         Torneio t = selecionarTorneio();
-        t.getPartidas().forEach(System.out::println);
+        for (Partida partida : t.getPartidas()) System.out.println(partida);
         Partida p = t.buscarPartida(lerInt("Id da partida: "));
         int placarA = lerInt("Placar " + p.getEquipeA().getTag() + ": ");
         int placarB = lerInt("Placar " + p.getEquipeB().getTag() + ": ");
@@ -146,15 +147,19 @@ public class Main {
     }
 
     private List<DesempenhoJogador> lerDesempenhos(Partida partida) {
-        if (!lerTexto("Registrar estatisticas individuais? (s/n): ").equalsIgnoreCase("s")) return List.of();
+        if (!lerTexto("Registrar estatisticas individuais? (s/n): ").equalsIgnoreCase("s")) {
+            return new ArrayList<>();
+        }
         List<DesempenhoJogador> lista = new ArrayList<>();
         List<Jogador> jogadores = new ArrayList<>();
         jogadores.addAll(partida.getEquipeA().getJogadores());
         jogadores.addAll(partida.getEquipeB().getJogadores());
-        for (Jogador jogador : jogadores.stream().filter(Jogador::isAtivo).toList()) {
-            System.out.println("Estatisticas de " + jogador.getNickname());
-            lista.add(new DesempenhoJogador(jogador, lerInt("  Abates: "), lerInt("  Mortes: "),
-                    lerInt("  Assistencias: ")));
+        for (Jogador jogador : jogadores) {
+            if (jogador.isAtivo()) {
+                System.out.println("Estatisticas de " + jogador.getNickname());
+                lista.add(new DesempenhoJogador(jogador, lerInt("  Abates: "), lerInt("  Mortes: "),
+                        lerInt("  Assistencias: ")));
+            }
         }
         return lista;
     }
@@ -162,26 +167,30 @@ public class Main {
     private void listarDados() {
         System.out.println("\nEQUIPES (ordenadas por nome)");
         listarEquipes();
-        sistema.listarEquipesOrdenadas().forEach(e -> e.getJogadoresOrdenadosPorNickname()
-                .forEach(j -> System.out.println("  " + j)));
+        for (Equipe equipe : sistema.listarEquipesOrdenadas()) {
+            for (Jogador jogador : equipe.getJogadoresOrdenadosPorNickname()) {
+                System.out.println("  " + jogador);
+            }
+        }
         System.out.println("\nTORNEIOS (ordenados por nome)");
         listarTorneios();
     }
     private void pesquisar() {
         String termo = lerTexto("Nome/tag da equipe ou jogo do torneio: ");
         System.out.println("Equipes encontradas:");
-        sistema.pesquisarEquipes(termo).forEach(System.out::println);
+        for (Equipe equipe : sistema.pesquisarEquipes(termo)) System.out.println(equipe);
         System.out.println("Torneios encontrados:");
-        sistema.pesquisarTorneiosPorJogo(termo).forEach(System.out::println);
+        for (Torneio torneio : sistema.pesquisarTorneiosPorJogo(termo)) System.out.println(torneio);
     }
     private void exibirRelatorios() {
         Torneio t = selecionarTorneio();
         System.out.printf("Total de equipes ativas: %d%n", relatorios.totalEquipesAtivas());
         System.out.printf("Total de jogadores ativos: %d%n", relatorios.totalJogadoresAtivos());
         System.out.printf("Media de abates por partida: %.2f%n", relatorios.mediaAbatesPorPartida(t));
-        System.out.println("MVP: " + relatorios.encontrarMvp(t)
-                .map(j -> j.getNickname() + " - " + j.getEstatistica().getAbates() + " abates")
-                .orElse("ainda nao ha estatisticas"));
+        Jogador mvp = relatorios.encontrarMvp(t);
+        if (mvp == null) System.out.println("MVP: ainda nao ha estatisticas");
+        else System.out.println("MVP: " + mvp.getNickname() + " - "
+                + mvp.getEstatistica().getAbates() + " abates");
         System.out.println("Ranking:");
         int posicao = 1;
         for (ClassificacaoEquipe c : t.gerarRanking()) {
@@ -202,11 +211,15 @@ public class Main {
     }
     private void listarEquipes() {
         if (sistema.getEquipes().isEmpty()) System.out.println("Nenhuma equipe cadastrada.");
-        else sistema.listarEquipesOrdenadas().forEach(System.out::println);
+        else {
+            for (Equipe equipe : sistema.listarEquipesOrdenadas()) System.out.println(equipe);
+        }
     }
     private void listarTorneios() {
         if (sistema.getTorneios().isEmpty()) System.out.println("Nenhum torneio cadastrado.");
-        else sistema.listarTorneiosOrdenados().forEach(System.out::println);
+        else {
+            for (Torneio torneio : sistema.listarTorneiosOrdenados()) System.out.println(torneio);
+        }
     }
     private String lerTexto(String prompt) {
         System.out.print(prompt);

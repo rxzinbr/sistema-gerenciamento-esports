@@ -6,7 +6,6 @@ import br.com.esports.domain.StatusTorneio;
 import br.com.esports.domain.Torneio;
 import br.com.esports.exception.RegraNegocioException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class SistemaEsports {
@@ -17,9 +16,11 @@ public class SistemaEsports {
     private int proximoTorneioId = 1;
 
     public Equipe cadastrarEquipe(String nome, String tag) {
-        if (equipes.stream().anyMatch(e -> e.getNome().equalsIgnoreCase(nome)
-                || e.getTag().equalsIgnoreCase(tag))) {
-            throw new RegraNegocioException("Ja existe equipe com esse nome ou tag.");
+        for (Equipe equipeCadastrada : equipes) {
+            if (equipeCadastrada.getNome().equalsIgnoreCase(nome)
+                    || equipeCadastrada.getTag().equalsIgnoreCase(tag)) {
+                throw new RegraNegocioException("Ja existe equipe com esse nome ou tag.");
+            }
         }
         Equipe equipe = new Equipe(proximaEquipeId++, nome, tag);
         equipes.add(equipe);
@@ -27,9 +28,12 @@ public class SistemaEsports {
     }
 
     public Jogador cadastrarJogador(int equipeId, String nome, String nickname) {
-        if (equipes.stream().flatMap(e -> e.getJogadores().stream())
-                .anyMatch(j -> j.getNickname().equalsIgnoreCase(nickname))) {
-            throw new RegraNegocioException("Nickname ja utilizado no sistema.");
+        for (Equipe equipe : equipes) {
+            for (Jogador jogadorCadastrado : equipe.getJogadores()) {
+                if (jogadorCadastrado.getNickname().equalsIgnoreCase(nickname)) {
+                    throw new RegraNegocioException("Nickname ja utilizado no sistema.");
+                }
+            }
         }
         Jogador jogador = new Jogador(proximoJogadorId++, nome, nickname);
         buscarEquipe(equipeId).adicionarJogador(jogador);
@@ -37,8 +41,10 @@ public class SistemaEsports {
     }
 
     public Torneio cadastrarTorneio(String nome, String jogo, int capacidade) {
-        if (torneios.stream().anyMatch(t -> t.getNome().equalsIgnoreCase(nome))) {
-            throw new RegraNegocioException("Ja existe torneio com esse nome.");
+        for (Torneio torneioCadastrado : torneios) {
+            if (torneioCadastrado.getNome().equalsIgnoreCase(nome)) {
+                throw new RegraNegocioException("Ja existe torneio com esse nome.");
+            }
         }
         Torneio torneio = new Torneio(proximoTorneioId++, nome, jogo, capacidade);
         torneios.add(torneio);
@@ -46,42 +52,82 @@ public class SistemaEsports {
     }
 
     public Equipe buscarEquipe(int id) {
-        return equipes.stream().filter(e -> e.getId() == id).findFirst()
-                .orElseThrow(() -> new RegraNegocioException("Equipe nao encontrada."));
+        for (Equipe equipe : equipes) {
+            if (equipe.getId() == id) return equipe;
+        }
+        throw new RegraNegocioException("Equipe nao encontrada.");
     }
     public Torneio buscarTorneio(int id) {
-        return torneios.stream().filter(t -> t.getId() == id).findFirst()
-                .orElseThrow(() -> new RegraNegocioException("Torneio nao encontrado."));
+        for (Torneio torneio : torneios) {
+            if (torneio.getId() == id) return torneio;
+        }
+        throw new RegraNegocioException("Torneio nao encontrado.");
     }
     public List<Equipe> pesquisarEquipes(String termo) {
         String busca = termo.toLowerCase();
-        return equipes.stream().filter(e -> e.getNome().toLowerCase().contains(busca)
-                        || e.getTag().toLowerCase().contains(busca))
-                .sorted(Comparator.comparing(Equipe::getNome, String.CASE_INSENSITIVE_ORDER)).toList();
+        ArrayList<Equipe> encontradas = new ArrayList<>();
+        for (Equipe equipe : equipes) {
+            if (equipe.getNome().toLowerCase().contains(busca)
+                    || equipe.getTag().toLowerCase().contains(busca)) encontradas.add(equipe);
+        }
+        ordenarEquipesPorNome(encontradas);
+        return encontradas;
     }
     public List<Torneio> pesquisarTorneiosPorJogo(String jogo) {
         String busca = jogo.toLowerCase();
-        return torneios.stream().filter(t -> t.getJogo().toLowerCase().contains(busca))
-                .sorted(Comparator.comparing(Torneio::getNome, String.CASE_INSENSITIVE_ORDER)).toList();
+        ArrayList<Torneio> encontrados = new ArrayList<>();
+        for (Torneio torneio : torneios) {
+            if (torneio.getJogo().toLowerCase().contains(busca)) encontrados.add(torneio);
+        }
+        ordenarTorneiosPorNome(encontrados);
+        return encontrados;
     }
     public void desativarEquipe(int id) {
         Equipe equipe = buscarEquipe(id);
-        boolean participaDeTorneioAtivo = torneios.stream()
-                .filter(t -> t.getStatus() != StatusTorneio.FINALIZADO)
-                .anyMatch(t -> t.estaInscrita(equipe));
+        boolean participaDeTorneioAtivo = false;
+        for (Torneio torneio : torneios) {
+            if (torneio.getStatus() != StatusTorneio.FINALIZADO && torneio.estaInscrita(equipe)) {
+                participaDeTorneioAtivo = true;
+                break;
+            }
+        }
         if (participaDeTorneioAtivo) {
             throw new RegraNegocioException("Equipe inscrita em torneio ativo nao pode ser desativada.");
         }
         equipe.desativar();
     }
     public List<Equipe> listarEquipesOrdenadas() {
-        return equipes.stream().sorted(Comparator.comparing(Equipe::getNome,
-                String.CASE_INSENSITIVE_ORDER)).toList();
+        ArrayList<Equipe> equipesOrdenadas = new ArrayList<>(equipes);
+        ordenarEquipesPorNome(equipesOrdenadas);
+        return equipesOrdenadas;
     }
     public List<Torneio> listarTorneiosOrdenados() {
-        return torneios.stream().sorted(Comparator.comparing(Torneio::getNome,
-                String.CASE_INSENSITIVE_ORDER)).toList();
+        ArrayList<Torneio> torneiosOrdenados = new ArrayList<>(torneios);
+        ordenarTorneiosPorNome(torneiosOrdenados);
+        return torneiosOrdenados;
     }
-    public List<Equipe> getEquipes() { return List.copyOf(equipes); }
-    public List<Torneio> getTorneios() { return List.copyOf(torneios); }
+    private void ordenarEquipesPorNome(List<Equipe> lista) {
+        for (int i = 0; i < lista.size(); i++) {
+            for (int j = i + 1; j < lista.size(); j++) {
+                if (lista.get(i).getNome().compareToIgnoreCase(lista.get(j).getNome()) > 0) {
+                    Equipe temporaria = lista.get(i);
+                    lista.set(i, lista.get(j));
+                    lista.set(j, temporaria);
+                }
+            }
+        }
+    }
+    private void ordenarTorneiosPorNome(List<Torneio> lista) {
+        for (int i = 0; i < lista.size(); i++) {
+            for (int j = i + 1; j < lista.size(); j++) {
+                if (lista.get(i).getNome().compareToIgnoreCase(lista.get(j).getNome()) > 0) {
+                    Torneio temporario = lista.get(i);
+                    lista.set(i, lista.get(j));
+                    lista.set(j, temporario);
+                }
+            }
+        }
+    }
+    public List<Equipe> getEquipes() { return new ArrayList<>(equipes); }
+    public List<Torneio> getTorneios() { return new ArrayList<>(torneios); }
 }

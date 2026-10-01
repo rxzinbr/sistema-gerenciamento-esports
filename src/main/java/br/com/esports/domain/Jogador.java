@@ -33,9 +33,14 @@ public class Jogador {
     public boolean isAtivo() { return ativo; }
     public Estatistica getEstatistica() { return estatistica; }
 
-    @Override public boolean equals(Object o) { return this == o || o instanceof Jogador j && id == j.id; }
+    @Override public boolean equals(Object objeto) {
+        if (this == objeto) return true;
+        if (!(objeto instanceof Jogador)) return false;
+        Jogador outroJogador = (Jogador) objeto;
+        return id == outroJogador.id;
+    }
     @Override public int hashCode() { return Objects.hash(id); }
     @Override public String toString() {
-        return "%d - %s (%s)%s".formatted(id, nickname, nomeCompleto, ativo ? "" : " [inativo]");
+        return String.format("%d - %s (%s)%s", id, nickname, nomeCompleto, ativo ? "" : " [inativo]");
     }
 }
