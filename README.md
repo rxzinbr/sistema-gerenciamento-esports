@@ -126,8 +126,6 @@ src/
 | Ferramenta | Objetivo | Resumo do uso | Revisão pelo Dev |
 | --- | --- | --- | --- |
 | Gemini | Raciocínio, documentação e README | Apoiou a estruturação inicial da ideia, das regras de negócio e do texto do README. | Validação das regras em relação ao enunciado e ajustes de clareza. |
-| OpenAI Codex | Código base, regras, testes e documentação | Implementou a arquitetura POO, menu, fluxo do torneio, relatórios, CSV e suíte de testes; removeu referências de citação inválidas do rascunho. | A equipe deve executar os testes, revisar cada regra e praticar alterações antes da apresentação. |
+| ChatGPT Codex | Código base, regras, testes e documentação | Implementou a arquitetura POO, menu, fluxo do torneio, relatórios, CSV e suíte de testes; removeu referências de citação inválidas do rascunho. | A equipe deve executar os testes, revisar cada regra e praticar alterações antes da apresentação. |
 
-> A equipe é responsável por compreender e revisar todo o código. Durante a apresentação, qualquer integrante poderá ser questionado e solicitado a realizar pequenas alterações.
 
-Apresentação prevista no enunciado: **07/10/2026**.
