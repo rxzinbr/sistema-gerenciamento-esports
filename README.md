@@ -8,7 +8,6 @@ Os usuários previstos são organizadores de campeonatos locais, ligas universit
 
 | Integrante | Responsabilidade principal |
 | --- | --- |
-| Arthur Moraes | Modelagem das classes de domínio e coleções |
 | Raphael Tuma | Regras de negócio e testes automatizados |
 | Thiago Sawada | Relatórios, indicadores, ranking e exportação CSV |
 | Gustavo Pinho | Menu interativo e fluxo da aplicação |
