@@ -84,15 +84,10 @@ public class SistemaEsports {
     }
     public void desativarEquipe(int id) {
         Equipe equipe = buscarEquipe(id);
-        boolean participaDeTorneioAtivo = false;
         for (Torneio torneio : torneios) {
             if (torneio.getStatus() != StatusTorneio.FINALIZADO && torneio.estaInscrita(equipe)) {
-                participaDeTorneioAtivo = true;
-                break;
+                throw new RegraNegocioException("Equipe inscrita em torneio ativo nao pode ser desativada.");
             }
-        }
-        if (participaDeTorneioAtivo) {
-            throw new RegraNegocioException("Equipe inscrita em torneio ativo nao pode ser desativada.");
         }
         equipe.desativar();
     }
