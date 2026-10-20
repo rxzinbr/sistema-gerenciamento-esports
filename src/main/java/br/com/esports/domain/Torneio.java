@@ -15,6 +15,7 @@ public class Torneio {
     private final ArrayList<Inscricao> inscricoes = new ArrayList<>();
     private final ArrayList<Partida> partidas = new ArrayList<>();
     private final ArrayList<ClassificacaoEquipe> classificacoes = new ArrayList<>();
+    private int proximaInscricaoId = 1;
     private int proximaPartidaId = 1;
 
     public Torneio(int id, String nome, String jogo, int capacidadeEquipes) {
@@ -49,7 +50,7 @@ public class Torneio {
         if (quantidadeInscricoesAtivas() >= capacidadeEquipes) {
             throw new RegraNegocioException("Nao ha vagas disponiveis no torneio.");
         }
-        Inscricao inscricao = new Inscricao(equipe);
+        Inscricao inscricao = new Inscricao(proximaInscricaoId++, equipe);
         inscricoes.add(inscricao);
         classificacoes.add(new ClassificacaoEquipe(equipe));
         if (quantidadeInscricoesAtivas() == capacidadeEquipes) status = StatusTorneio.EM_ANDAMENTO;
@@ -87,13 +88,16 @@ public class Torneio {
             throw new RegraNegocioException("As duas equipes devem estar inscritas no torneio.");
         }
         if (equipeA.equals(equipeB)) throw new RegraNegocioException("Uma equipe nao pode jogar contra si mesma.");
+        boolean conflito = false;
         for (Partida partidaCadastrada : partidas) {
             if (!partidaCadastrada.isFinalizada()
                     && partidaCadastrada.getDataHora().equals(dataHora)
                     && (partidaCadastrada.envolve(equipeA) || partidaCadastrada.envolve(equipeB))) {
-                throw new RegraNegocioException("Conflito de agenda: uma equipe ja joga nesse horario.");
+                conflito = true;
+                break;
             }
         }
+        if (conflito) throw new RegraNegocioException("Conflito de agenda: uma equipe ja joga nesse horario.");
         Partida partida = new Partida(proximaPartidaId++, equipeA, equipeB, dataHora);
         partidas.add(partida);
         return partida;
@@ -101,14 +105,17 @@ public class Torneio {
 
     public void reagendarPartida(int partidaId, LocalDateTime novaDataHora) {
         Partida partida = buscarPartida(partidaId);
+        boolean conflito = false;
         for (Partida partidaCadastrada : partidas) {
             if (partidaCadastrada.getId() != partidaId && !partidaCadastrada.isFinalizada()
                     && partidaCadastrada.getDataHora().equals(novaDataHora)
                     && (partidaCadastrada.envolve(partida.getEquipeA())
                     || partidaCadastrada.envolve(partida.getEquipeB()))) {
-                throw new RegraNegocioException("Conflito de agenda no novo horario.");
+                conflito = true;
+                break;
             }
         }
+        if (conflito) throw new RegraNegocioException("Conflito de agenda no novo horario.");
         partida.reagendar(novaDataHora);
     }
 

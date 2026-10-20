@@ -3,7 +3,9 @@ package br.com.esports.domain;
 import br.com.esports.exception.RegraNegocioException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Partida {
     private final int id;
@@ -32,15 +34,14 @@ public class Partida {
         if (finalizada) throw new RegraNegocioException("O resultado desta partida ja foi registrado.");
         if (placarA < 0 || placarB < 0) throw new RegraNegocioException("Placar nao pode ser negativo.");
         if (placarA == placarB) throw new RegraNegocioException("A partida deve possuir um vencedor.");
-        ArrayList<Jogador> jogadoresInformados = new ArrayList<>();
+        Set<Jogador> jogadoresInformados = new HashSet<>();
         for (DesempenhoJogador desempenho : novosDesempenhos) {
             boolean pertence = equipeA.getJogadores().contains(desempenho.getJogador())
                     || equipeB.getJogadores().contains(desempenho.getJogador());
             if (!pertence) throw new RegraNegocioException("Jogador informado nao participa desta partida.");
-            if (jogadoresInformados.contains(desempenho.getJogador())) {
+            if (!jogadoresInformados.add(desempenho.getJogador())) {
                 throw new RegraNegocioException("Desempenho duplicado para o mesmo jogador.");
             }
-            jogadoresInformados.add(desempenho.getJogador());
         }
         this.placarA = placarA;
         this.placarB = placarB;
