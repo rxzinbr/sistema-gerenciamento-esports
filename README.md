@@ -22,7 +22,7 @@ Após a equipe possuir jogadores suficientes, ela pode ser inscrita em um tornei
 
 ## Funcionalidades
 
-- Cadastrar equipes, jogadores e torneios; editar equipes e torneios.
+- Cadastrar e editar equipes, jogadores e torneios.
 - Consultar e listar registros em ordem alfabética.
 - Pesquisar equipes por nome/tag e torneios por jogo.
 - Desativar equipes conforme as regras do domínio.
